@@ -1,0 +1,197 @@
+----------------------------------------------------------------------------------------------------------------------------------
+7.-
+include Irvine32.inc
+
+.DATA
+filas BYTE ?
+cols  BYTE ?
+letra BYTE 'H'
+.CODE
+MAIN PROC
+
+	CALL Random
+
+EXIT
+MAIN ENDP
+
+Random PROC
+     
+	MOV  ecx,100				           ; itera 50 veces
+	L1: 
+
+		 MOV  al,50                   ; valores de 50 - 0   
+		 CALL  RandomRange             ; genera entero aleatorio
+		 mov filas,al
+		 mov dh, filas
+
+		 MOV  al,100                   ; valores de 100 - 0   
+		 CALL  RandomRange             ; genera entero aleatorio
+		 ;MOV aleatorioColumna, eax
+		 mov cols,al
+		 mov dl, cols
+		
+		 call Gotoxy 
+		 
+		 MOV  al,letra                   ; letra
+		 CALL  WriteChar               ; escribe la letra
+
+		 MOV  eax,100       ;Se detiene 100 mls para ver el resultado
+		 CALL Delay
+		 CALL Clrscr         ;Limpia la pantalla al final de cada ciclo
+	loop  L1
+		 CALL  Crlf
+	RET
+
+Random ENDP
+
+END MAIN
+------------------------------------------------------------------------------------------------------------------------------------
+8.-
+include Irvine32.inc
+
+.DATA
+	suma dword ?
+	ale dword ?
+	color dword ?
+	car dword 'H'
+.CODE
+MAIN PROC
+
+	CALL Colores
+
+EXIT
+MAIN ENDP
+
+Colores PROC 
+	MOV ecx, 256
+	ciclo:	
+		push ecx
+		mov ecx,15
+		ciclo2:
+			mov ale,ecx
+			mov eax,ale
+			call RandomRange
+			mov color,eax
+			mov eax,color      
+			call setTextColor
+			mov edx,OFFSET car 
+			call writeString
+		loop ciclo2
+		pop ecx
+		
+	loop ciclo
+	cmp ecx,0
+		jp salir
+salir:
+exit
+	RET
+Colores ENDP
+
+END MAIN
+----------------------------------------------------------------------------
+/***JUEGO DE NUMEROS ALEATORIO***/
+include Irvine32.inc
+
+.DATA
+aleatorio dword ?
+numero dword ?
+cad1 BYTE 'Felicidades, los numero son iguales,¿Quiere volver a jugar? Presione 1 ',0
+cad2 BYTE 'Ingrese intentos: ',0
+cad3 BYTE 'los numeros no son iguales ',0
+cad4 BYTE 'lo sentimos, se han acabado los intentos, ¿Quiere volver a jugar? Presione 1 ',0
+cad5 BYTE 'Ingrese numero: ',0
+cad6 BYTE 'El numero es mayor al que se intenta adivinar ',0
+cad7 BYTE 'El numero es menor al que se intenta adivinar ',0
+
+intentosNumero dword ?
+.CODE
+MAIN PROC
+
+	call IntentosP
+
+EXIT
+MAIN ENDP
+
+GenerarAleatorio PROC
+	MOV eax,10
+	CALL RandomRange
+	RET
+GenerarAleatorio ENDP
+
+PedirNumero PROC
+	MOV edx, offset cad5
+	CALL WriteString
+	CALL ReadInt
+	RET
+PedirNumero ENDP
+
+
+IntentosP PROC
+	MOV edx, offset cad2
+	CALL WriteString
+	CALL ReadInt
+	MOV intentosNumero,eax
+	MOV ecx, intentosNumero
+	push ecx
+
+	CALL GenerarAleatorio        ;aleatorio	
+	;CALL WriteInt
+	MOV aleatorio,eax
+	push aleatorio
+	ciclo:
+
+		
+
+		CALL PedirNumero          ;teclado
+		
+		CMP eax,aleatorio		  ;compara
+		
+		JA  mayor                 ;MAYOR
+		JB  menor                 ;MENOR
+
+		MOV edx, offset cad1
+		CALL writeString
+		CALL readInt
+		
+		CALL Crlf
+		CMP eax,1
+		JE volver
+
+		EXIT
+
+		volver:
+			CALL IntentosP
+
+
+	    mayor:
+			MOV edx, offset cad6
+			CALL writeString
+			CALL Crlf
+			LOOP ciclo
+
+		menor:
+			MOV edx, offset cad7
+			CALL writeString
+			CALL Crlf
+			LOOP ciclo
+		
+
+	LOOP ciclo
+	POP ecx
+	
+	CMP ecx,0
+	JP salir
+	
+	salir:
+			MOV edx, offset cad4
+			CALL writeString
+			CALL readInt
+		
+			CALL Crlf
+			CMP eax,1
+			JE volver
+		
+			EXIT
+	RET
+IntentosP ENDP
+END MAIN
